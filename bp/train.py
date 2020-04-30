@@ -93,14 +93,14 @@ if __name__ == "__main__":
             with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
                 f.seek(0)
                 f.truncate
-                f.writelines("%f\n" % score for score in running_score)
+                f.writelines("%f\n" % score for score in running_score_history)
         if running_score > max_running_score:
             max_running_score += 100
             name = str(TRAIN_NO)+"_"+"score_"+str(running_score) + \
                 "episode_"+str(episode)+"_progres_save_params"
             agent.save_param(name=name)
 
-        if running_score > env.reward_threshold:
+        if running_score > env.reward_threshold+100:
             print("Solved! Running reward is now {} and the last episode runs to {}!".format(
                 running_score, score))
             break
