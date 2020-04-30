@@ -21,7 +21,7 @@ class Env():
 
         self.die = False
         img_rgb = self.env.reset()
-        img_gray = self.rgb_to_gray(img_rgb)
+        img_gray = rgb_to_gray(img_rgb)
         self.stack = [img_gray] * self.img_stack  # four frames for decision
         return np.array(self.stack)
 
@@ -40,7 +40,7 @@ class Env():
             done = True if self.av_r(reward) <= -0.1 else False
             if done or die:
                 break
-            
+
         img_gray = rgb_to_gray(img_rgb)# self.rgb2gray(img_rgb)
 
         self.stack.pop(0)
