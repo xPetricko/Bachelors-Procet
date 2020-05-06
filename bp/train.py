@@ -43,7 +43,7 @@ args = parser.parse_args()
 NUM_EPISODES = 100000
 MAX_STEPS = 2000
 
-TRAIN_NO = 1
+TRAIN_NO = 9
 
 
 torch.manual_seed(args.seed)
@@ -98,12 +98,20 @@ if __name__ == "__main__":
                 f.truncate
                 f.writelines("%f\n" % score for score in running_score_history)
         if running_score > max_running_score:
-            max_running_score += 100
+            max_running_score += 10
             name = str(TRAIN_NO)+"_"+"score_"+str(running_score) + \
                 "episode_"+str(episode)+"_progres_save_params"
             agent.save_param(name=name)
 
-        if running_score > env.reward_threshold:
+        if running_score > env.reward_threshold+50:
             print("Solved! Running reward is now {} and the last episode runs to {}!".format(
                 running_score, score))
+            with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
+                f.seek(0)
+                f.truncate
+                f.writelines("%f\n" % score for score in score_history)
+            with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
+                f.seek(0)
+                f.truncate
+                f.writelines("%f\n" % score for score in running_score_history)
             break
