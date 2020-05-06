@@ -18,6 +18,7 @@ def save_args(TRAIN_NO, args):
     with open("data/args/"+str(TRAIN_NO)+'args.txt', 'w') as f:
         f.write(str(args))
 
+
 parser = argparse.ArgumentParser(
     description='Bachelors project Andrej Petricko PPO Reinforcement Learning')
 parser.add_argument('--alpha', type=float, default=1e-3,
@@ -33,6 +34,8 @@ parser.add_argument('--seed', type=int, default=0,
 parser.add_argument('--render', action='store_true',
                     help='render the environment')
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
+                    help='interval between training status logs (default: 10)')
+parser.add_argument('--nn-type', type=int, default=0, metavar='N',
                     help='interval between training status logs (default: 10)')
 args = parser.parse_args()
 
@@ -51,7 +54,7 @@ if torch.cuda.is_available():
 if __name__ == "__main__":
     save_args(TRAIN_NO, args)
 
-    agent = Agent(alpha=args.alpha, gamma=args.gamma, img_stack=args.img_stack)
+    agent = Agent(alpha=args.alpha, gamma=args.gamma, img_stack=args.img_stack, nn_type=args.nn_type)
     env = Env(seed=args.seed, action_repeat=args.action_repeat,
               img_stack=args.img_stack)
     running_score = 0
@@ -100,7 +103,7 @@ if __name__ == "__main__":
                 "episode_"+str(episode)+"_progres_save_params"
             agent.save_param(name=name)
 
-        if running_score > env.reward_threshold+100:
+        if running_score > env.reward_threshold:
             print("Solved! Running reward is now {} and the last episode runs to {}!".format(
                 running_score, score))
             break

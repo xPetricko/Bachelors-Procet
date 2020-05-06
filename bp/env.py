@@ -12,7 +12,7 @@ class Env():
         
         self.env = CarRacing()#gym.make('CarRacing-v0')
         self.env.seed(self.seed)
-        self.reward_threshold = 900#self.env.spec.reward_threshold
+        self.reward_threshold = 900 #self.env.spec.reward_threshold
 
 
     def reset(self):
