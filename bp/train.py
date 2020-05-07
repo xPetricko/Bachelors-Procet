@@ -43,7 +43,7 @@ args = parser.parse_args()
 NUM_EPISODES = 100000
 MAX_STEPS = 2000
 
-TRAIN_NO = 9
+TRAIN_NO = 10
 
 
 torch.manual_seed(args.seed)

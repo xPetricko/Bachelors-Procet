@@ -21,7 +21,7 @@ class Env():
 
         self.die = False
         img_rgb = self.env.reset()
-        img_gray = rgb_to_gray(img_rgb)
+        img_gray = state_preproces(img_rgb)
         self.stack = [img_gray] * self.img_stack  # four frames for decision
         return np.array(self.stack)
 
@@ -31,18 +31,18 @@ class Env():
             img_rgb, reward, die, _ = self.env.step(action)
             done = die
             # don't penalize "done state"
-#            if die:
-#                reward += 100
+            if die:
+                reward += 100
             # green penalty
-#            if np.mean(img_rgb[:, :, 1]) > 185.0:
-#                reward -= 0.05
+            if np.mean(img_rgb[:, :, 1]) > 185.0:
+                reward -= 0.05
             total_reward += reward
             # if no reward recently, end the episode
-#            done = True if self.av_r(reward) <= -0.1 else False
+            done = True if self.av_r(reward) <= -0.1 else False
             if done or die:
                 break
 
-        img_gray = rgb_to_gray(img_rgb)# self.rgb2gray(img_rgb)
+        img_gray = state_preproces(img_rgb)# self.rgb2gray(img_rgb)
 
         self.stack.pop(0)
         self.stack.append(img_gray)
