@@ -65,13 +65,11 @@ class NetBN(nn.Module):
             nn.BatchNorm2d(8),
             nn.ReLU(),  # activation
             nn.Conv2d(8, 16, kernel_size=3, stride=2),  # (8, 47, 47)
-            nn.BatchNorm2d(16),
             nn.ReLU(),  # activation
             nn.Conv2d(16, 32, kernel_size=3, stride=2),  # (16, 23, 23)
             nn.BatchNorm2d(32),
             nn.ReLU(),  # activation
             nn.Conv2d(32, 64, kernel_size=3, stride=2),  # (32, 11, 11)
-            nn.BatchNorm2d(64),
             nn.ReLU(),  # activation
             nn.Conv2d(64, 128, kernel_size=3, stride=1),  # (64, 5, 5)
             nn.BatchNorm2d(128),
