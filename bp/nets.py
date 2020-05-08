@@ -53,17 +53,17 @@ class Net(nn.Module):
 
 class NetMP(nn.Module):
     def __init__(self, gamma, img_stack, alpha=1e-3):
-        super(NetBN, self).__init__()
+        super(NetMP, self).__init__()
         self.img_stack = img_stack
         self.gamma = gamma
 
         self.cnn_base = nn.Sequential(  # input shape (4, 96, 96)
             nn.Conv2d(self.img_stack, 8, kernel_size=4, stride=2),
             nn.ReLU(),  # activation
-            nn.MaxPool2d(kernel_size=3, stride=1)
+            nn.MaxPool2d(kernel_size=3, stride=1),
             nn.Conv2d(8, 16, kernel_size=3, stride=2),  # (8, 45, 45)
             nn.ReLU(),  # activation
-            nn.MaxPool2d(kernel_size=2)
+            nn.MaxPool2d(kernel_size=2),
             nn.Conv2d(16, 32, kernel_size=3, stride=2),  # (32, 11, 11)
             nn.ReLU(),  # activation
             nn.Conv2d(32, 64, kernel_size=3, stride=1),  # (64, 5, 5)
@@ -87,7 +87,7 @@ class NetMP(nn.Module):
 
     def forward(self, x):
         x = self.cnn_base(x)
-        x = x.view(-1, 256)
+        x = x.view(-1, 128)
         v = self.v(x)
         x = self.fc(x)
         alpha = self.alpha_head(x) + 1

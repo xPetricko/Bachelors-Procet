@@ -7,7 +7,7 @@ import torch.optim as optim
 from torch.distributions import Beta
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 
-from nets import Net, NetBN
+from nets import Net, NetMP
 
 
 class Agent():
@@ -31,7 +31,7 @@ class Agent():
         if nn_type==0:
             self.net = Net(alpha=self.alpha, gamma=self.gamma, img_stack=self.img_stack).double().to(self.device)
         else:
-            self.net = NetBN(alpha=self.alpha, gamma=self.gamma, img_stack=self.img_stack).double().to(self.device)
+            self.net = NetMP(alpha=self.alpha, gamma=self.gamma, img_stack=self.img_stack).double().to(self.device)
         
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition)
         self.counter = 0
