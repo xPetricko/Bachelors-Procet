@@ -14,7 +14,7 @@ class Agent():
     max_grad_norm = 0.5
     clip_param = 0.1  # epsilon in clipped loss
     ppo_epoch = 10
-    buffer_capacity, batch_size = 2000, 128
+    buffer_capacity, batch_size = 200, 128
 
     def __init__(self, alpha, gamma, img_stack, nn_type):
         self.alpha = alpha
@@ -29,11 +29,11 @@ class Agent():
             self.net = Net(alpha=self.alpha, gamma=self.gamma,
                            img_stack=self.img_stack).double().to(self.device)
         else:
-            self.net = NetMP(alpha=self.alpha, gamma=self.gamma, img_stack=self.img_stack).double().to(self.device)
-        
+            self.net = NetMP(alpha=self.alpha, gamma=self.gamma,
+                             img_stack=self.img_stack).double().to(self.device)
+
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition)
         self.counter = 0
-
 
     def select_action(self, state):
         state = T.from_numpy(state).double().to(self.device).unsqueeze(0)
@@ -42,7 +42,6 @@ class Agent():
         dist = Beta(alpha, beta)
         action = dist.sample()
         a_logp = dist.log_prob(action).sum(dim=1)
-
         action = action.squeeze().cpu().numpy()
         a_logp = a_logp.item()
         return action, a_logp
@@ -83,9 +82,14 @@ class Agent():
 
                 alpha, beta = self.net(s[index])[0]
                 dist = Beta(alpha, beta)
+                print(index)
+                print(dist.log_prob(a[index]))
+                print(dist.log_prob(a[index]).sum(dim=1, keepdim=True))
+                print(old_a_logp[index])
+                input()
                 a_logp = dist.log_prob(a[index]).sum(dim=1, keepdim=True)
                 ratio = T.exp(a_logp - old_a_logp[index])
-
+             
                 surr1 = ratio * adv[index]
                 surr2 = T.clamp(ratio, 1.0 - self.clip_param,
                                 1.0 + self.clip_param) * adv[index]
