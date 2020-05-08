@@ -24,7 +24,7 @@ class Agent():
         self.transition = np.dtype([('s', np.float64, (self.img_stack, 96, 96)), ('a', np.float64, (3,)), ('a_logp', np.float64),
                                     ('r', np.float64), ('s_n', np.float64, (self.img_stack, 96, 96))])
         self.training_step = 0
-        self.device = T.device("cuda:0" if T.cuda.is_navailable() else "cpu")
+        self.device = T.device("cuda:0" if T.cuda.is_available() else "cpu")
         if nn_type == 0:
             self.net = Net(alpha=self.alpha, gamma=self.gamma,
                            img_stack=self.img_stack).double().to(self.device)
@@ -67,8 +67,7 @@ class Agent():
 
         s = T.tensor(self.buffer['s'], dtype=T.double).to(self.device)
         a = T.tensor(self.buffer['a'], dtype=T.double).to(self.device)
-        r = T.tensor(self.buffer['r'], dtype=T.double).to(
-            self.device).view(-1, 1)
+        r = T.tensor(self.buffer['r'], dtype=T.double).to(self.device).view(-1, 1)
         s_n = T.tensor(self.buffer['s_n'], dtype=T.double).to(self.device)
 
         old_a_logp = T.tensor(self.buffer['a_logp'], dtype=T.double).to(
@@ -113,8 +112,6 @@ class Agent():
 
             (alpha, beta), critic_value = self.net(s[index])
             _, critic_value_ = self.net(s_n[index])
-
-            dist = Beta(alpha, beta)§
             a_logp = dist.log_prob(a[index]).sum(dim=1, keepdim=True)
 
             delta = r[index] + self.gamma*critic_value_ - critic_value

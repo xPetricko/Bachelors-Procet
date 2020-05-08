@@ -21,7 +21,7 @@ class Agent():
         self.gamma = gamma
         self.img_stack = img_stack
 
-        self.transition = np.dtype([('s', np.float64, (self.img_stack, 96, 96)), ('a', np.int, (1,)), ('a_logp', np.float64),
+        self.transition = np.dtype([('s', np.float64, (self.img_stack, 96, 96)), ('a', np.float64), ('a_logp', np.float64),
                                     ('r', np.float64), ('s_n', np.float64, (self.img_stack, 96, 96))])
         self.training_step = 0
         self.device = T.device("cuda:0" if T.cuda.is_available() else "cpu")
@@ -41,7 +41,6 @@ class Agent():
         action_probs = T.distributions.Categorical(action_probs)
         action = action_probs.sample()
         a_logp = action_probs.log_prob(action)
-
         return action.cpu().numpy(), a_logp
 
     def save_param(self, name):
@@ -63,9 +62,8 @@ class Agent():
         self.training_step += 1
 
         s = T.tensor(self.buffer['s'], dtype=T.double).to(self.device)
-        a = T.tensor(self.buffer['a'], dtype=T.int).to(self.device)
-        r = T.tensor(self.buffer['r'], dtype=T.double).to(
-            self.device).view(-1, 1)
+        a = T.tensor(self.buffer['a'], dtype=T.double).to(self.device).view(-1, 1)
+        r = T.tensor(self.buffer['r'], dtype=T.double).to(self.device).view(-1, 1)
         s_n = T.tensor(self.buffer['s_n'], dtype=T.double).to(self.device)
 
         old_a_logp = T.tensor(self.buffer['a_logp'], dtype=T.double).to(
@@ -79,9 +77,9 @@ class Agent():
         for _ in range(self.ppo_epoch):
             for index in BatchSampler(SubsetRandomSampler(range(self.buffer_capacity)), self.batch_size, False):
 
-                action = self.net(s[index])[0]
-
-                a_logp = action.log_prob(a[index]).sum(dim=1, keepdim=True)
+                action_probs = self.net(s[index])[0]
+                action_probs = T.distributions.Categorical(action_probs)
+                a_logp = action_probs.log_prob(a[index]).sum(dim=1, keepdim=True)
 
                 ratio = T.exp(a_logp - old_a_logp[index])
 
