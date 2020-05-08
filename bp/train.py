@@ -68,15 +68,14 @@ if __name__ == "__main__":
 
         for t in range(MAX_STEPS):
             action, a_logp = agent.select_action(state)
-            state_, reward, done, die = env.step(
-                action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
+            new_state, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
             if args.render:
                 env.render()
-            if agent.store((state, action, a_logp, reward, state_)):
+            if agent.store((state, action, a_logp, reward, new_state)):
                 print('updating')
                 agent.update()
             score += reward
-            state = state_
+            state = new_state
             if done or die:
                 break
 
