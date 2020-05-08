@@ -36,7 +36,7 @@ parser.add_argument('--render', action='store_true',
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='interval between training status logs (default: 10)')
 parser.add_argument('--nn-type', type=int, default=0, metavar='N',
-                    help='interval between training status logs (default: 10)')
+                    help='nn-type')
 args = parser.parse_args()
 
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
 
         for t in range(MAX_STEPS):
             action, a_logp = agent.select_action(state)
-            new_state, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
+            new_state, reward, done, die = env.step(action)
             if args.render:
                 env.render()
             if agent.store((state, action, a_logp, reward, new_state)):
