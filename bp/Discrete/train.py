@@ -36,7 +36,7 @@ parser.add_argument('--render', action='store_true',
 parser.add_argument('--log-interval', type=int, default=10, metavar='N',
                     help='interval between training status logs (default: 10)')
 parser.add_argument('--nn-type', type=int, default=0, metavar='N',
-                    help='nn-type')
+                    help='interval between training status logs (default: 10)')
 args = parser.parse_args()
 
 
@@ -67,19 +67,17 @@ if __name__ == "__main__":
         state = env.reset()
 
         for t in range(MAX_STEPS):
-            action, a_logp, state_val = agent.select_action(state)
+            action, a_logp = agent.select_action(state)
             new_state, reward, done, die = env.step(action)
-            agent.store((action, reward, a_logp,state_val))
             if args.render:
                 env.render()
+            if agent.store((state, action, a_logp, reward, new_state)):
+                print('updating')
+                agent.update()
             score += reward
             state = new_state
             if done or die:
                 break
-
-        print('updating')
-        agent.update()
-        agent.reset_memory()
 
         running_score = running_score * 0.99 + score * 0.01
         running_score_history.append(running_score)
