@@ -69,15 +69,18 @@ if __name__ == "__main__":
         for t in range(MAX_STEPS):
             action = agent.select_action(state)
             new_state, reward, done, die = env.step(action)
+            agent.store((state, action, done, reward, new_state))
             if args.render:
                 env.render()
-            if agent.store((state, action, done, reward, new_state)):
-                print('updating')
-                agent.update()
             score += reward
             state = new_state
             if done or die:
                 break
+        
+        print(t)
+        print('updating')
+        agent.update()
+        agent.reset_memory()
 
         running_score = running_score * 0.99 + score * 0.01
         running_score_history.append(running_score)

@@ -14,7 +14,7 @@ class Agent():
     max_grad_norm = 0.5
     clip_param = 0.1  # epsilon in clipped loss
     ppo_epoch = 10
-    buffer_capacity, batch_size = 128, 128
+    buffer_capacity, batch_size = 2000,200
 
     def __init__(self, alpha, gamma, img_stack, nn_type):
         self.alpha = alpha
@@ -33,6 +33,7 @@ class Agent():
     def select_action(self, state):
         state = T.from_numpy(state).double().to(self.device).unsqueeze(0)
         actions = self.net(state)[0]
+        
         actions = F.softmax(actions,dim=0)
         probs = T.distributions.Categorical(actions)
 
@@ -46,17 +47,25 @@ class Agent():
     def store(self, transition):
         self.buffer[self.counter] = transition
         self.counter += 1
-        if self.counter == self.buffer_capacity:
-            self.counter = 0
-            return True
-        else:
-            return False
+
+    def reset_memory(self):
+        self.transition = np.dtype([('s', np.float64, (self.img_stack, 96, 96)), ('a', np.float64), ('d', np.float64),
+                                    ('r', np.float64), ('s_n', np.float64, (self.img_stack, 96, 96))])
+        self.counter = 0
+        
 
     def load_param(name):
         self.net.load_state_dict(T.load('data/param/"'+name+'.pkl'))
 
     def update(self):
+        
+        asd = 0
+        for x in self.buffer:
+            if x==None:
+                print("None")
+            asd+=1
 
+        print(asd)
         s = T.tensor(self.buffer['s'], dtype=T.double).to(self.device)
         a = T.tensor(self.buffer['a'], dtype=T.double).to(
             self.device).view(-1, 1)
@@ -74,7 +83,7 @@ class Agent():
 
         logits, v = self.net(s)
         dists = F.softmax(logits, dim=1)
-        probs = Categorical(dists)
+        probs = T.distributions.Categorical(dists)
 
         value_loss = F.mse_loss(v, target_v.detach())
 
@@ -83,12 +92,13 @@ class Agent():
             entropy.append(-T.sum(dist.mean() * T.log(dist)))
         entropy = T.stack(entropy).sum()
 
-        advantage = target_v - values
-        policy_loss = -probs.log_prob(actions.view(a.size(0))).view(-1, 1) * advantage.detach()
+        advantage = target_v - v
+        policy_loss = -probs.log_prob(a.view(a.size(0))).view(-1, 1) * advantage.detach()
         policy_loss = policy_loss.mean()
         
         loss = policy_loss + value_loss - 0.001 * entropy 
 
         self.net.optimizer.zero_grad()
         loss.backward()
+        # nn.utils.clip_grad_norm_(self.net.parameters(), 0.5)
         self.net.optimizer.step()
