@@ -14,7 +14,7 @@ class Agent():
     max_grad_norm = 0.5
     clip_param = 0.1  # epsilon in clipped loss
     ppo_epoch = 10
-    buffer_capacity, batch_size = 150, 128
+    buffer_capacity, batch_size = 128, 128
 
     def __init__(self, alpha, gamma, img_stack, nn_type):
         self.alpha = alpha
@@ -76,24 +76,24 @@ class Agent():
             adv = target_v - self.net(s)[1]
             # adv = (adv - adv.mean()) / (adv.std() + 1e-8) #optional
 
-        for _ in range(self.ppo_epoch):
-            for index in SubsetRandomSampler(range(self.buffer_capacity)):
 
-                action = self.net(s[index].unsqueeze(0))[0]
-                action = T.distributions.Categorical(action)
+        for index in range(self.buffer_capacity):
 
-                a_logp = action.log_prob(a[index])
+            action = self.net(s[index].unsqueeze(0))[0]
+            action = T.distributions.Categorical(action)
 
-                ratio = T.exp(a_logp - old_a_logp[index])
-                surr1 = ratio * adv[index]
-                surr2 = T.clamp(ratio, 1.0 - self.clip_param,
-                                1.0 + self.clip_param) * adv[index]
-                action_loss = -T.min(surr1, surr2).mean()
-                value_loss = F.smooth_l1_loss(
-                    self.net(s[index].unsqueeze(0))[1], target_v[index])
-                loss = action_loss + 2. * value_loss
+            a_logp = action.log_prob(a[index])
 
-                self.net.optimizer.zero_grad()
-                loss.backward()
-                # nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm) #optional
-                self.net.optimizer.step()
+            ratio = T.exp(a_logp - old_a_logp[index])
+            surr1 = ratio * adv[index]
+            surr2 = T.clamp(ratio, 1.0 - self.clip_param,
+                            1.0 + self.clip_param) * adv[index]
+            action_loss = -T.min(surr1, surr2).mean()
+            value_loss = F.smooth_l1_loss(
+                self.net(s[index].unsqueeze(0))[1], target_v[index])
+            loss = action_loss + 2. * value_loss
+
+            self.net.optimizer.zero_grad()
+            loss.backward()
+            # nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm) #optional
+            self.net.optimizer.step()
