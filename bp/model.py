@@ -66,8 +66,7 @@ class Agent():
 
         s = T.tensor(self.buffer['s'], dtype=T.double).to(self.device)
         a = T.tensor(self.buffer['a'], dtype=T.double).to(self.device)
-        r = T.tensor(self.buffer['r'], dtype=T.double).to(
-            self.device).view(-1, 1)
+        r = T.tensor(self.buffer['r'], dtype=T.double).to(self.device).view(-1, 1)
         s_n = T.tensor(self.buffer['s_n'], dtype=T.double).to(self.device)
 
         old_a_logp = T.tensor(self.buffer['a_logp'], dtype=T.double).to(
@@ -117,7 +116,6 @@ class Agent():
 
             (alpha, beta), critic_value = self.net(s[index])
             _, critic_value_ = self.net(s_n[index])
-
             a_logp = dist.log_prob(a[index]).sum(dim=1, keepdim=True)
 
             delta = r[index] + self.gamma*critic_value_ - critic_value
