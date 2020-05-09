@@ -14,7 +14,7 @@ class Agent():
     max_grad_norm = 0.5
     clip_param = 0.1  # epsilon in clipped loss
     ppo_epoch = 10
-    buffer_capacity, batch_size = 128, 128
+    buffer_capacity, batch_size = 200, 200
 
     def __init__(self, alpha, gamma, img_stack, nn_type):
         self.alpha = alpha
@@ -25,8 +25,9 @@ class Agent():
                                     ('r', np.float64), ('s_n', np.float64, (self.img_stack, 96, 96))])
         self.training_step = 0
         self.device = T.device("cuda:0" if T.cuda.is_available() else "cpu")
-        self.net = Net(alpha=self.alpha, gamma=self.gamma,
-                        img_stack=self.img_stack).double().to(self.device)
+        if nn_type == 0:
+            self.net = Net(alpha=self.alpha, gamma=self.gamma,
+                           img_stack=self.img_stack).double().to(self.device)
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition)
         self.counter = 0
 
