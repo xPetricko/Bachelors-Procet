@@ -67,17 +67,16 @@ if __name__ == "__main__":
         state = env.reset()
 
         for t in range(MAX_STEPS):
-            action = agent.select_action(state)
+            action, a_logp, state_val = agent.select_action(state)
             new_state, reward, done, die = env.step(action)
-            agent.store((state, action, done, reward, new_state))
+            agent.store((action, reward, a_logp,state_val))
             if args.render:
                 env.render()
             score += reward
             state = new_state
             if done or die:
                 break
-        
-        print(t)
+
         print('updating')
         agent.update()
         agent.reset_memory()
