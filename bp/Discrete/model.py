@@ -14,25 +14,24 @@ class Agent():
     max_grad_norm = 0.5
     clip_param = 0.1  # epsilon in clipped loss
     ppo_epoch = 10
-    buffer_capacity, batch_size = 2000, 200
+    buffer_capacity, batch_size = 200, 128
 
     def __init__(self, alpha, gamma, img_stack, nn_type):
         self.alpha = alpha
         self.gamma = gamma
         self.img_stack = img_stack
 
-        # self.transition = np.dtype([('s', np.float64, (self.img_stack, 96, 96)), ('a', np.float64), ('d', np.float64),
-        #                             ('r', np.float64), ('s_n', np.float64, (self.img_stack, 96, 96))])
-        self.transition = []
+        self.transition = np.dtype([('s', np.float64, (self.img_stack, 96, 96)), ('a', np.float64), ('a_logp', np.float64),
+                                     ('r', np.float64), ('s_n', np.float64, (self.img_stack, 96, 96))])
         self.training_step = 0
         self.device = T.device("cpu" if T.cuda.is_available() else "cpu")
         self.net = Net(alpha=self.alpha, gamma=self.gamma,
-                       img_stack=self.img_stack).float().to(self.device)
+                       img_stack=self.img_stack).double().to(self.device)
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition)
         self.counter = 0
 
     def select_action(self, state):
-        state = T.from_numpy(state).float().to(self.device).unsqueeze(0)
+        state = T.from_numpy(state).double().to(self.device).unsqueeze(0)
         actions,v = self.net(state)
 
         actions = F.softmax(actions, dim=0)
@@ -43,16 +42,21 @@ class Agent():
 
         
 
-        return action.cpu().numpy(), a_logp,v
+        return action.cpu().numpy(), a_logp
 
     def save_param(self, name):
         T.save(self.net.state_dict(), 'data/param/'+name+'params.pkl')
 
     def store(self, transition):
-        self.transition.append(transition)
+        self.buffer[self.counter] = transition
+        self.counter += 1
+        if self.counter == self.buffer_capacity:
+            self.counter = 0
+            return True
+        else:
+            return False
 
-    def reset_memory(self):
-        self.transition = []
+
 
     def load_param(name):
         self.net.load_state_dict(T.load('data/param/"'+name+'.pkl'))
@@ -60,31 +64,39 @@ class Agent():
     def update(self):
 
         
-        act = [sars[0] for sars in self.transition]
-        rew = [sars[1] for sars in self.transition]
-        logprobs = [sars[2] for sars in self.transition]
-        state_val = [sars[3] for sars in self.transition]
+        s = T.tensor(self.buffer['s'], dtype=T.double).to(self.device)
+        a = T.tensor(self.buffer['a'], dtype=T.double).to(self.device)#.view(-1, 1)
+        r = T.tensor(self.buffer['r'], dtype=T.double).to(self.device).view(-1, 1)
+        s_n = T.tensor(self.buffer['s_n'], dtype=T.double).to(self.device)
 
-         # calculating discounted rewards:
-        rewards = []
-        dis_reward = 0
-        for reward in rew[::-1]:
-            dis_reward = reward + self.gamma * dis_reward
-            rewards.insert(0, dis_reward)
-                
-        # normalizing the rewards:
-        rewards = T.tensor(rewards)
-        rewards = (rewards - rewards.mean()) / (rewards.std())
+        old_a_logp = T.tensor(self.buffer['a_logp'], dtype=T.double).to(
+            self.device).view(-1, 1)
+    
         
-        loss = 0
-        for logprob, value, reward in zip(logprobs, state_val , rewards):
-            advantage = reward  - value.item()
-            action_loss = -logprob * advantage
-            value_loss = F.smooth_l1_loss(value, reward)
-            loss += (action_loss + value_loss)   
+        with T.no_grad():
+            target_v = r + self.gamma * self.net(s_n)[1]
+            adv = target_v - self.net(s)[1]
+            # adv = (adv - adv.mean()) / (adv.std() + 1e-8) #optional
 
-        print(loss)
-        self.net.optimizer.zero_grad()
-        loss.backward()
-        # nn.utils.clip_grad_norm_(self.net.parameters(), 0.5)
-        self.net.optimizer.step()
+        for _ in range(self.ppo_epoch):
+            for index in BatchSampler(SubsetRandomSampler(range(self.buffer_capacity)), self.batch_size, False):
+
+                act = self.net(s[index])[0]
+                act = F.softmax(act, dim=1)
+                dist = T.distributions.Categorical(act)
+                a_logp = dist.log_prob(a[index]).view(len(index),1)
+                ratio = T.exp(a_logp.view(len(index),1) - old_a_logp[index])
+             
+                surr1 = ratio * adv[index]
+                surr2 = T.clamp(ratio, 1.0 - self.clip_param,
+                                1.0 + self.clip_param) * adv[index]
+                action_loss = -T.min(surr1, surr2).mean()
+                value_loss = F.smooth_l1_loss(
+                    self.net(s[index])[1], target_v[index])
+                loss = action_loss + 2. * value_loss
+
+                self.net.optimizer.zero_grad()
+                loss.backward()
+                # nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm) #optional
+                self.net.optimizer.step()
+

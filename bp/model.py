@@ -82,12 +82,10 @@ class Agent():
 
                 alpha, beta = self.net(s[index])[0]
                 dist = Beta(alpha, beta)
-                print(index)
-                print(dist.log_prob(a[index]))
-                print(dist.log_prob(a[index]).sum(dim=1, keepdim=True))
-                print(old_a_logp[index])
-                input()
                 a_logp = dist.log_prob(a[index]).sum(dim=1, keepdim=True)
+                print(a_logp)
+                print("Shape: ",a_logp.size())
+                input()
                 ratio = T.exp(a_logp - old_a_logp[index])
              
                 surr1 = ratio * adv[index]
@@ -103,29 +101,3 @@ class Agent():
                 # nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm) #optional
                 self.net.optimizer.step()
 
-    def update_vanila(self):
-        self.training_step += 1
-
-        s = T.tensor(self.buffer['s'], dtype=T.double).to(self.device)
-        a = T.tensor(self.buffer['a'], dtype=T.double).to(self.device)
-        r = T.tensor(self.buffer['r'], dtype=T.double).to(
-            self.device).view(-1, 1)
-        s_n = T.tensor(self.buffer['s_n'], dtype=T.double).to(self.device)
-
-        for index in BatchSampler(SubsetRandomSampler(range(self.buffer_capacity)), self.batch_size, False):
-
-            (alpha, beta), critic_value = self.net(s[index])
-            _, critic_value_ = self.net(s_n[index])
-            a_logp = dist.log_prob(a[index]).sum(dim=1, keepdim=True)
-
-            delta = r[index] + self.gamma*critic_value_ - critic_value
-
-            actor_loss = self.log_probs * delta
-            critic_loss = delta**2
-
-            loss = actor_loss + critic_loss
-
-            self.net.optimizer.zero_grad()
-            loss.backward()
-            # nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm) #optional
-            self.net.optimizer.step()
