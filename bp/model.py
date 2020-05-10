@@ -7,14 +7,14 @@ import torch.optim as optim
 from torch.distributions import Beta
 from torch.utils.data.sampler import BatchSampler, SubsetRandomSampler
 
-from nets import Net, NetMP
+from nets import Net
 
 
 class Agent():
     max_grad_norm = 0.5
     clip_param = 0.1  # epsilon in clipped loss
     ppo_epoch = 10
-    buffer_capacity, batch_size = 200, 128
+    buffer_capacity, batch_size = 2000, 128
 
     def __init__(self, alpha, gamma, img_stack, nn_type):
         self.alpha = alpha
@@ -25,12 +25,10 @@ class Agent():
                                     ('r', np.float64), ('s_n', np.float64, (self.img_stack, 96, 96))])
         self.training_step = 0
         self.device = T.device("cuda:0" if T.cuda.is_available() else "cpu")
-        if nn_type == 0:
-            self.net = Net(alpha=self.alpha, gamma=self.gamma,
-                           img_stack=self.img_stack).double().to(self.device)
-        else:
-            self.net = NetMP(alpha=self.alpha, gamma=self.gamma,
-                             img_stack=self.img_stack).double().to(self.device)
+
+        self.net = Net(alpha=self.alpha, gamma=self.gamma,
+                        img_stack=self.img_stack).double().to(self.device)
+
 
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition)
         self.counter = 0
@@ -47,7 +45,7 @@ class Agent():
         return action, a_logp
 
     def save_param(self, name):
-        T.save(self.net.state_dict(), 'data/param/'+name+'params.pkl')
+        T.save(self.net.state_dict(), 'data/param/'+name+'.pkl')
 
     def store(self, transition):
         self.buffer[self.counter] = transition
@@ -58,8 +56,8 @@ class Agent():
         else:
             return False
 
-    def load_param(name):
-        self.net.load_state_dict(torch.load('data/param/"'+name+'.pkl'))
+    def load_param(self,name):
+        self.net.load_state_dict(T.load('data/param/'+name+'.pkl'))
 
     def update(self):
         self.training_step += 1

@@ -45,6 +45,7 @@ MAX_STEPS = 2000
 
 TRAIN_NO = 10
 
+save =  False
 
 torch.manual_seed(args.seed)
 if torch.cuda.is_available():
@@ -52,7 +53,7 @@ if torch.cuda.is_available():
 
 
 if __name__ == "__main__":
-    save_args(TRAIN_NO, args)
+    # save_args(TRAIN_NO, args)
 
     agent = Agent(alpha=args.alpha, gamma=args.gamma, img_stack=args.img_stack, nn_type=args.nn_type)
     env = Env(seed=args.seed, action_repeat=args.action_repeat,
@@ -71,9 +72,9 @@ if __name__ == "__main__":
             new_state, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
             if args.render:
                 env.render()
-            if agent.store((state, action, a_logp, reward, new_state)):
-                print('updating')
-                agent.update()
+            # if agent.store((state, action, a_logp, reward, new_state)):
+            #     print('updating')
+            #     agent.update()
             score += reward
             state = new_state
             if done or die:
@@ -87,30 +88,30 @@ if __name__ == "__main__":
             print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(
                 episode, score, running_score))
             name = str(TRAIN_NO) + "_automatic_save_params"
-            agent.save_param(name=name)
-            with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
-                f.seek(0)
-                f.truncate
-                f.writelines("%f\n" % score for score in score_history)
-            with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
-                f.seek(0)
-                f.truncate
-                f.writelines("%f\n" % score for score in running_score_history)
-        if running_score > max_running_score:
-            max_running_score += 10
-            name = str(TRAIN_NO)+"_"+"score_"+str(running_score) + \
-                "episode_"+str(episode)+"_progres_save_params"
-            agent.save_param(name=name)
+        #     agent.save_param(name=name)
+        #     with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
+        #         f.seek(0)
+        #         f.truncate
+        #         f.writelines("%f\n" % score for score in score_history)
+        #     with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
+        #         f.seek(0)
+        #         f.truncate
+        #         f.writelines("%f\n" % score for score in running_score_history)
+        # if running_score > max_running_score:
+        #     max_running_score += 10
+        #     name = str(TRAIN_NO)+"_"+"score_"+str(running_score) + \
+        #         "episode_"+str(episode)+"_progres_save_params"
+        #     agent.save_param(name=name)
 
-        if running_score > env.reward_threshold+50:
-            print("Solved! Running reward is now {} and the last episode runs to {}!".format(
-                running_score, score))
-            with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
-                f.seek(0)
-                f.truncate
-                f.writelines("%f\n" % score for score in score_history)
-            with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
-                f.seek(0)
-                f.truncate
-                f.writelines("%f\n" % score for score in running_score_history)
-            break
+        # if running_score > env.reward_threshold+50:
+        #     print("Solved! Running reward is now {} and the last episode runs to {}!".format(
+        #         running_score, score))
+        #     with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
+        #         f.seek(0)
+        #         f.truncate
+        #         f.writelines("%f\n" % score for score in score_history)
+        #     with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
+        #         f.seek(0)
+        #         f.truncate
+        #         f.writelines("%f\n" % score for score in running_score_history)
+        #     break

@@ -26,7 +26,7 @@ class Net(nn.Module):
             nn.Conv2d(128, 256, kernel_size=3, stride=1),  # (128, 3, 3)
             nn.ReLU(),  # activation
         )  # output shape (256, 1, 1)
-        self.v = nn.Sequential(nn.Linear(256, 1), nn.ReLU())
+        self.v = nn.Sequential(nn.Linear(256, 100), nn.ReLU(), nn.Linear(100, 1))
         self.a = nn.Sequential(
             nn.Linear(256, 100),
             nn.ReLU(),
