@@ -5,14 +5,6 @@ import numpy as np
 
 
 
-def estimated_time(completed,num_episodes):
-    estimated = ((100 - completed )/100)*num_episodes*(end-start)
-    hour = estimated // 3600
-    minutes = (estimated % 3600) // 60
-    sek = (estimated % 3600) % 60
-
-    return hour,minutes,sek
-
 
 def state_simplify(state):
     #Remove different grass colors
@@ -25,13 +17,13 @@ def state_simplify(state):
                         state[i,j] = [102,102,102]
     return state
 
+
 def rgb_to_gray(image):
     #convert image from RGB to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     gray = gray.astype("float32")/255
     
     return gray
-
 
 
 def state_contrast_add(state):
@@ -45,6 +37,12 @@ def state_contrast_add(state):
     return state
 
 
-
 def state_preproces(state  ):
     return state_contrast_add(rgb_to_gray(state_simplify(state)))
+
+
+def is_out(s):
+    if  not (s[65][43] == [102,102,102]).all( ) and  not (s[77][43] == [102,102,102]).all() and not (s[65][50] == [102,102,102]).all() and not (s[77][50] == [102,102,102]).all():
+        return True
+    else:
+        return False

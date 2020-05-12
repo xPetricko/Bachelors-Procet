@@ -43,7 +43,7 @@ args = parser.parse_args()
 NUM_EPISODES = 100000
 MAX_STEPS = 2000
 
-TRAIN_NO = 10
+TRAIN_NO = 11
 
 
 torch.manual_seed(args.seed)
@@ -96,6 +96,10 @@ if __name__ == "__main__":
                 f.seek(0)
                 f.truncate
                 f.writelines("%f\n" % score for score in running_score_history)
+            with open('data/loss_history.txt', 'w') as f:
+                f.seek(0)
+                f.truncate
+                f.writelines("%f\n" % loss for loss in agent.loss_history)
         if running_score > max_running_score:
             max_running_score += 10
             name = str(TRAIN_NO)+"_"+"score_"+str(running_score) + \

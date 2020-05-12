@@ -79,9 +79,6 @@ class Agent():
                 alpha, beta = self.net(s[index])[0]
                 dist = Beta(alpha, beta)
                 a_logp = dist.log_prob(a[index]).sum(dim=1, keepdim=True)
-                print(a_logp)
-                print("Shape: ", a_logp.size())
-                input()
                 ratio = T.exp(a_logp - old_a_logp[index])
 
                 surr1 = ratio * adv[index]
