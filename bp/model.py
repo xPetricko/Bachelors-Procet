@@ -14,7 +14,7 @@ class Agent():
     max_grad_norm = 0.5
     clip_param = 0.1  # epsilon in clipped loss
     ppo_epoch = 10
-    buffer_capacity, batch_size = 200, 128
+    buffer_capacity, batch_size = 2000, 128
 
     def __init__(self, alpha, gamma, img_stack, nn_type):
         self.alpha = alpha

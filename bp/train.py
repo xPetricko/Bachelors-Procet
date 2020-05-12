@@ -45,6 +45,7 @@ MAX_STEPS = 2000
 
 TRAIN_NO = 10
 
+save =  False
 
 torch.manual_seed(args.seed)
 if torch.cuda.is_available():
@@ -52,7 +53,7 @@ if torch.cuda.is_available():
 
 
 if __name__ == "__main__":
-    save_args(TRAIN_NO, args)
+    # save_args(TRAIN_NO, args)
 
     agent = Agent(alpha=args.alpha, gamma=args.gamma, img_stack=args.img_stack, nn_type=args.nn_type)
     env = Env(seed=args.seed, action_repeat=args.action_repeat,
@@ -84,10 +85,10 @@ if __name__ == "__main__":
         running_score_history.append(running_score)
         score_history.append(score)
 
-        # if episode % args.log_interval == 0:
-        #     print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(
-        #         episode, score, running_score))
-        #     name = str(TRAIN_NO) + "_automatic_save_params"
+        if episode % args.log_interval == 0:
+            print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(
+                episode, score, running_score))
+            name = str(TRAIN_NO) + "_automatic_save_params"
         #     agent.save_param(name=name)
         #     with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
         #         f.seek(0)
