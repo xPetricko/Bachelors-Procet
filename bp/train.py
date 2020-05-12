@@ -58,6 +58,7 @@ if __name__ == "__main__":
     env = Env(seed=args.seed, action_repeat=args.action_repeat,
               img_stack=args.img_stack)
     running_score = 0
+    agent.load_param("ppo_net_params")
     state = env.reset()
     max_running_score = 100
     score_history = []
@@ -71,9 +72,9 @@ if __name__ == "__main__":
             new_state, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
             if args.render:
                 env.render()
-            if agent.store((state, action, a_logp, reward, new_state)):
-                print('updating')
-                agent.update()
+            # if agent.store((state, action, a_logp, reward, new_state)):
+            #     print('updating')
+            #     agent.update()
             score += reward
             state = new_state
             if done or die:
@@ -83,34 +84,34 @@ if __name__ == "__main__":
         running_score_history.append(running_score)
         score_history.append(score)
 
-        if episode % args.log_interval == 0:
-            print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(
-                episode, score, running_score))
-            name = str(TRAIN_NO) + "_automatic_save_params"
-            agent.save_param(name=name)
-            with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
-                f.seek(0)
-                f.truncate
-                f.writelines("%f\n" % score for score in score_history)
-            with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
-                f.seek(0)
-                f.truncate
-                f.writelines("%f\n" % score for score in running_score_history)
-        if running_score > max_running_score:
-            max_running_score += 10
-            name = str(TRAIN_NO)+"_"+"score_"+str(running_score) + \
-                "episode_"+str(episode)+"_progres_save_params"
-            agent.save_param(name=name)
+        # if episode % args.log_interval == 0:
+        #     print('Ep {}\tLast score: {:.2f}\tMoving average score: {:.2f}'.format(
+        #         episode, score, running_score))
+        #     name = str(TRAIN_NO) + "_automatic_save_params"
+        #     agent.save_param(name=name)
+        #     with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
+        #         f.seek(0)
+        #         f.truncate
+        #         f.writelines("%f\n" % score for score in score_history)
+        #     with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
+        #         f.seek(0)
+        #         f.truncate
+        #         f.writelines("%f\n" % score for score in running_score_history)
+        # if running_score > max_running_score:
+        #     max_running_score += 10
+        #     name = str(TRAIN_NO)+"_"+"score_"+str(running_score) + \
+        #         "episode_"+str(episode)+"_progres_save_params"
+        #     agent.save_param(name=name)
 
-        if running_score > env.reward_threshold+50:
-            print("Solved! Running reward is now {} and the last episode runs to {}!".format(
-                running_score, score))
-            with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
-                f.seek(0)
-                f.truncate
-                f.writelines("%f\n" % score for score in score_history)
-            with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
-                f.seek(0)
-                f.truncate
-                f.writelines("%f\n" % score for score in running_score_history)
-            break
+        # if running_score > env.reward_threshold+50:
+        #     print("Solved! Running reward is now {} and the last episode runs to {}!".format(
+        #         running_score, score))
+        #     with open("data/score_history/"+str(TRAIN_NO)+'_score_history.txt', 'w') as f:
+        #         f.seek(0)
+        #         f.truncate
+        #         f.writelines("%f\n" % score for score in score_history)
+        #     with open("data/score_history/"+str(TRAIN_NO)+'_runnig_history.txt', 'w') as f:
+        #         f.seek(0)
+        #         f.truncate
+        #         f.writelines("%f\n" % score for score in running_score_history)
+        #     break
