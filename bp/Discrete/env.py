@@ -25,6 +25,7 @@ class Env():
         self.stack = [img_gray] * self.img_stack  # four frames for decision
         return np.array(self.stack)
 
+    
     def step(self, action):
         total_reward = 0
         for i in range(self.action_repeat):
@@ -38,16 +39,17 @@ class Env():
                 reward -= 0.05
             total_reward += reward
             # if no reward recently, end the episode
-            done = True if self.av_r(reward) <= -0.1 else False
+            done = True if self.av_r(reward) <= -0.1 or is_out(img_rgb) else False
             if done or die:
                 break
 
-        img_gray = state_preproces(img_rgb)
+        img_gray = state_preproces(img_rgb)# self.rgb2gray(img_rgb)
 
         self.stack.pop(0)
         self.stack.append(img_gray)
         assert len(self.stack) == self.img_stack
         return np.array(self.stack), total_reward, done, die
+
 
     def render(self, *arg):
         self.env.render(*arg)

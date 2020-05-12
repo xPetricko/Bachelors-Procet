@@ -29,7 +29,7 @@ if use_cuda:
 
 if __name__ == "__main__":
     agent = Agent(1e-3,0.99,4,0)
-    agent.load_param("ppo_net_params")
+    agent.load_param("7_score_940.065972508194episode_2518_progres_save_paramsparams")
     env = Env(0,8,4)
 
     training_records = []

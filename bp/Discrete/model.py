@@ -11,7 +11,7 @@ from nets import Net
 
 
 class Agent():
-    max_grad_norm = 0.5
+    max_grad_norm = 1.5
     clip_param = 0.1  # epsilon in clipped loss
     ppo_epoch = 10
     buffer_capacity, batch_size = 2000, 128
@@ -29,6 +29,8 @@ class Agent():
                        img_stack=self.img_stack).double().to(self.device)
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition)
         self.counter = 0
+
+        self.loss_history = []
 
     def select_action(self, state):
         state = T.from_numpy(state).double().to(self.device).unsqueeze(0)
@@ -96,7 +98,8 @@ class Agent():
                 loss = action_loss + 2. * value_loss
 
                 self.net.optimizer.zero_grad()
+                self.loss_history.append(loss)
                 loss.backward()
-                # nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm) #optional
+                #nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm) #optional
                 self.net.optimizer.step()
 

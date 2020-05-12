@@ -500,6 +500,11 @@ if __name__=="__main__":
         restart = False
         while True:
             s, r, done, info = env.step(a)
+            if steps > 30:
+                if  not (s[65][43] == [102,102,102]).all( ) and  not (s[77][43] == [102,102,102]).all() and not (s[65][50] == [102,102,102]).all() and not (s[77][50] == [102,102,102]).all():
+                    env.reset()
+                    break
+                    print("Out of TRACK")
             total_reward += r
             if steps % 200 == 0 or done:
                 print("\naction " + str(["{:+0.2f}".format(x) for x in a]))

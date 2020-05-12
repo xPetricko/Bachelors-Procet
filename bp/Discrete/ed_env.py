@@ -346,11 +346,11 @@ class CarRacing(gym.Env, EzPickle):
     def make_continuous_action(self,a):
         act = np.array([0., 0., 0.])
         if a == 0: # left
-            act = np.array([-0.8, 0., 0.])
+            act = np.array([-1, 0., 0.])
         elif a == 1: # right
-            act = np.array([0.8, 0., 0.])
+            act = np.array([1, 0., 0.])
         elif a == 2: # gas
-            act = np.array([0., 1., 0.])
+            act = np.array([0., 1, 0.])
         elif a == 3: # brake
             act = np.array([0., 0., 0.7])
         elif a == 4: # noop
