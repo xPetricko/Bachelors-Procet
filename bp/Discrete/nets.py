@@ -27,10 +27,7 @@ class Net(nn.Module):
             nn.ReLU(),  # activation
         )  # output shape (256, 1, 1)
         self.v = nn.Sequential(nn.Linear(256, 100), nn.ReLU(), nn.Linear(100, 1))
-        self.a = nn.Sequential(
-            nn.Linear(256, 100),
-            nn.ReLU(),
-            nn.Linear(100,5),)
+        self.fc = nn.Sequential(nn.Linear(256, 100), nn.ReLU())
         self.apply(self._weights_init)
         self.optimizer = optim.Adam(self.parameters(), lr=alpha)
 
@@ -45,7 +42,6 @@ class Net(nn.Module):
         x = self.cnn_base(x)
         x = x.view(-1, 256)
         v = self.v(x)
-        a = self.a(x)
+        x = self.fc(x)
 
-
-        return a, v
+        return x, v

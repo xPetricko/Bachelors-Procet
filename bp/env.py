@@ -21,7 +21,7 @@ class Env():
 
         self.die = False
         img_rgb = self.env.reset()
-        img_gray = state_preproces(img_rgb)
+        img_gray = rgb_to_gray(img_rgb)
         self.stack = [img_gray] * self.img_stack  # four frames for decision
         return np.array(self.stack)
 
@@ -43,7 +43,7 @@ class Env():
             if done or die:
                 break
 
-        img_gray = state_preproces(img_rgb)# self.rgb2gray(img_rgb)
+        img_gray =  rgb_to_gray(img_rgb)#state_preproces(img_rgb)#
 
         self.stack.pop(0)
         self.stack.append(img_gray)

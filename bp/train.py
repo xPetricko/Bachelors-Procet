@@ -43,7 +43,7 @@ args = parser.parse_args()
 NUM_EPISODES = 100000
 MAX_STEPS = 2000
 
-TRAIN_NO = 12
+TRAIN_NO = 14
 
 
 torch.manual_seed(args.seed)
@@ -57,6 +57,7 @@ if __name__ == "__main__":
     agent = Agent(alpha=args.alpha, gamma=args.gamma, img_stack=args.img_stack, nn_type=args.nn_type)
     env = Env(seed=args.seed, action_repeat=args.action_repeat,
               img_stack=args.img_stack)
+    agent.load_param(name="13_score_460.17260382805284episode_2522_progres_save_params")
     running_score = 0
     state = env.reset()
     max_running_score = 100

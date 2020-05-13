@@ -43,8 +43,7 @@ args = parser.parse_args()
 NUM_EPISODES = 100000
 MAX_STEPS = 2000
 
-TRAIN_NO = 11
-
+TRAIN_NO = 12
 
 torch.manual_seed(args.seed)
 if torch.cuda.is_available():
@@ -65,7 +64,6 @@ if __name__ == "__main__":
     for episode in range(NUM_EPISODES):
         score = 0
         state = env.reset()
-
         for t in range(MAX_STEPS):
             action, a_logp = agent.select_action(state)
             new_state, reward, done, die = env.step(action)

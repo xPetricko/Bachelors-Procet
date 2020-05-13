@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-NO = 10
+NO = 12
 with open(str(NO)+"_score_history.txt","r") as f:
     a = f.readlines()
 

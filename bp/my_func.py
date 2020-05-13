@@ -43,6 +43,7 @@ def state_preproces(state  ):
 
 def is_out(s):
     if  not (s[65][43] == [102,102,102]).all( ) and  not (s[77][43] == [102,102,102]).all() and not (s[65][50] == [102,102,102]).all() and not (s[77][50] == [102,102,102]).all():
+        print("IS out")
         return True
     else:
         return False

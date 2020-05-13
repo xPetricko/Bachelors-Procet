@@ -39,7 +39,7 @@ class Env():
                 reward -= 0.05
             total_reward += reward
             # if no reward recently, end the episode
-            done = True if self.av_r(reward) <= -0.1 or is_out(img_rgb) else False
+            done = True if self.av_r(reward) <= -0.1 else False
             if done or die:
                 break
 
