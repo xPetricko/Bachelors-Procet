@@ -7,17 +7,28 @@ import torch
 import torch.nn as nn
 
 
-from nets import Net
-from ed_env import CarRacing
 from model import Agent
-from my_func import *
 from env import Env
 
-parser = argparse.ArgumentParser(description='Test the PPO agent for the CarRacing-v0')
-parser.add_argument('--action-repeat', type=int, default=8, metavar='N', help='repeat action in N frames (default: 8)')
-parser.add_argument('--img-stack', type=int, default=4, metavar='N', help='stack N image in a state (default: 4)')
-parser.add_argument('--seed', type=int, default=0, metavar='N', help='random seed (default: 0)')
-parser.add_argument('--render', action='store_true', help='render the environment')
+
+parser = argparse.ArgumentParser(
+    description='Bachelors project Andrej Petricko PPO Reinforcement Learning')
+parser.add_argument('--alpha', type=float, default=1e-3,
+                    metavar='G', help='discount factor (default: 0.001)')
+parser.add_argument('--gamma', type=float, default=0.99,
+                    metavar='G', help='discount factor (default: 0.99)')
+parser.add_argument('--action-repeat', type=int, default=8,
+                    metavar='N', help='repeat action in N frames (default: 8)')
+parser.add_argument('--img-stack', type=int, default=4,
+                    metavar='N', help='stack N image in a state (default: 4)')
+parser.add_argument('--seed', type=int, default=0,
+                    metavar='N', help='random seed (default: 0)')
+parser.add_argument('--render', action='store_true',
+                    help='render the environment')
+parser.add_argument('--log-interval', type=int, default=10, metavar='N',
+                    help='interval between training status logs (default: 10)')
+parser.add_argument('--nn-type', type=int, default=0, metavar='N',
+                    help='interval between training status logs (default: 10)')
 args = parser.parse_args()
 
 use_cuda = torch.cuda.is_available()
@@ -28,20 +39,25 @@ if use_cuda:
 
 
 if __name__ == "__main__":
-    agent = Agent(1e-3,0.99,4,0)
-    agent.load_param("7_score_940.065972508194episode_2518_progres_save_paramsparams")
-    env = Env(0,8,4)
+    agent = Agent(alpha=args.alpha, gamma=args.gamma,
+                  img_stack=args.img_stack, nn_type=args.nn_type)
+    env = Env(seed=args.seed, action_repeat=args.action_repeat,
+              img_stack=args.img_stack)
 
-    training_records = []
+    agent.load_param(
+        name='ppo_net_params')
+    test_records = []
     running_score = 0
     state = env.reset()
-    for i_ep in range(10):
+    for i_ep in range(100):
         score = 0
         state = env.reset()
 
-        for t in range(1000):
+        for t in range(100000):
             action, _ = agent.select_action(state)
-            state_, reward, done, die = env.step(action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
+            print(action)
+            state_, reward, done, die = env.step(
+                action * np.array([2., 1., 1.]) + np.array([-1., 0., 0.]))
             if args.render:
                 env.render()
             score += reward
@@ -49,4 +65,6 @@ if __name__ == "__main__":
             if done or die:
                 break
 
+        test_records.append(score)
         print('Ep {}\tScore: {:.2f}\t'.format(i_ep, score))
+    print(np.mean(test))

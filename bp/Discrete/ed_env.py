@@ -498,10 +498,10 @@ def human_control():
     def key_press(k, mod):
         global restart
         if k==0xff0d: restart = True
-        if k==key.LEFT:  a[0] = -1.0
-        if k==key.RIGHT: a[0] = +1.0
-        if k==key.UP:    a[1] = +1.0
-        if k==key.DOWN:  a[2] = +0.8   # set 1.0 for wheels to block to zero rotation
+        if k==key.LEFT:  a[0] = -0.3
+        if k==key.RIGHT: a[0] = +0.3
+        if k==key.UP:    a[1] = +0.7
+        if k==key.DOWN:  a[2] = +0.4   # set 1.0 for wheels to block to zero rotation
     def key_release(k, mod):
         if k==key.LEFT  and a[0]==-1.0: a[0] = 0
         if k==key.RIGHT and a[0]==+1.0: a[0] = 0

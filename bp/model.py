@@ -24,12 +24,9 @@ class Agent():
         self.transition = np.dtype([('s', np.float64, (self.img_stack, 96, 96)), ('a', np.float64, (3,)), ('a_logp', np.float64),
                                     ('r', np.float64), ('s_n', np.float64, (self.img_stack, 96, 96))])
         self.training_step = 0
-        self.device = T.device("cuda:0" if T.cuda.is_available() else "cpu")
-
+        self.device = T.device("cpu" if T.cuda.is_available() else "cpu")
         self.net = Net(alpha=self.alpha, gamma=self.gamma,
-                        img_stack=self.img_stack).double().to(self.device)
-
-
+                       img_stack=self.img_stack).double().to(self.device)
         self.buffer = np.empty(self.buffer_capacity, dtype=self.transition)
         self.counter = 0
 
@@ -56,7 +53,7 @@ class Agent():
         else:
             return False
 
-    def load_param(self,name):
+    def load_param(self, name):
         self.net.load_state_dict(T.load('data/param/'+name+'.pkl'))
 
     def update(self):
@@ -64,7 +61,8 @@ class Agent():
 
         s = T.tensor(self.buffer['s'], dtype=T.double).to(self.device)
         a = T.tensor(self.buffer['a'], dtype=T.double).to(self.device)
-        r = T.tensor(self.buffer['r'], dtype=T.double).to(self.device).view(-1, 1)
+        r = T.tensor(self.buffer['r'], dtype=T.double).to(
+            self.device).view(-1, 1)
         s_n = T.tensor(self.buffer['s_n'], dtype=T.double).to(self.device)
 
         old_a_logp = T.tensor(self.buffer['a_logp'], dtype=T.double).to(
@@ -82,7 +80,7 @@ class Agent():
                 dist = Beta(alpha, beta)
                 a_logp = dist.log_prob(a[index]).sum(dim=1, keepdim=True)
                 ratio = T.exp(a_logp - old_a_logp[index])
-             
+
                 surr1 = ratio * adv[index]
                 surr2 = T.clamp(ratio, 1.0 - self.clip_param,
                                 1.0 + self.clip_param) * adv[index]
@@ -95,4 +93,3 @@ class Agent():
                 loss.backward()
                 # nn.utils.clip_grad_norm_(self.net.parameters(), self.max_grad_norm) #optional
                 self.net.optimizer.step()
-
